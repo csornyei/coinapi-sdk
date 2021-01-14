@@ -24,7 +24,35 @@ defmodule Coinapi do
     %Coinapi.Options{options | headers: [{"X-CoinAPI-Key", api_key}]}
   end
 
+  @spec parse_response({any, HTTPoison.Response.t()}) ::
+          {:error, <<_::64, _::_*8>>} | {:ok, false | nil | true | binary | [any] | number | map}
+  def parse_response({_status, %HTTPoison.Response{body: body, status_code: status_code}}) do
+    case status_code do
+      200 ->
+        {:ok, Poison.decode!(body)}
+
+      400 ->
+        {:error, "There is something wrong with your request"}
+
+      401 ->
+        {:error, "Your API key is wrong"}
+
+      403 ->
+        {:error, "Your API key doesnt't have enough privileges to access this resource"}
+
+      429 ->
+        {:error, "You have exceeded your API key rate limits"}
+
+      550 ->
+        {:error, "You requested specific single item that we don't have at this moment."}
+    end
+  end
+
   def metadata_get_exchanges(%Coinapi.Options{url: url, headers: headers}) do
     Coinapi.get(url <> "v1/exchanges", headers)
+  end
+
+  def metadata_get_exchanges(%Coinapi.Options{url: url, headers: headers}, filter) do
+    Coinapi.get(url <> "v1/exchanges?filter_exchange_id=#{filter}", headers)
   end
 end
