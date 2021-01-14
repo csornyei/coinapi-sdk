@@ -24,8 +24,6 @@ defmodule Coinapi do
     %Coinapi.Options{options | headers: [{"X-CoinAPI-Key", api_key}]}
   end
 
-  @spec parse_response({any, HTTPoison.Response.t()}) ::
-          {:error, <<_::64, _::_*8>>} | {:ok, false | nil | true | binary | [any] | number | map}
   def parse_response({_status, %HTTPoison.Response{body: body, status_code: status_code}}) do
     case status_code do
       200 ->
@@ -54,5 +52,44 @@ defmodule Coinapi do
 
   def metadata_get_exchanges(%Coinapi.Options{url: url, headers: headers}, filter) do
     Coinapi.get(url <> "v1/exchanges?filter_exchange_id=#{filter}", headers)
+  end
+
+  def metadata_get_all_exchange_icons(%Coinapi.Options{url: url, headers: headers}, icon_size) do
+    Coinapi.get(url <> "v1/exchanges/icons/#{icon_size}", headers)
+  end
+
+  def metadata_get_all_assets(%Coinapi.Options{url: url, headers: headers}) do
+    Coinapi.get(url <> "v1/assets", headers)
+  end
+
+  def metadata_get_all_assets(%Coinapi.Options{url: url, headers: headers}, filter) do
+    Coinapi.get(url <> "v1/assets?filter_asset_id=#{filter}", headers)
+  end
+
+  def metadata_get_all_assets_icons(%Coinapi.Options{url: url, headers: headers}, icon_size) do
+    Coinapi.get(url <> "v1/assets/icons/#{icon_size}", headers)
+  end
+
+  def metadata_get_all_symbols(%Coinapi.Options{url: url, headers: headers}) do
+    Coinapi.get(url <> "v1/symbols/", headers)
+  end
+
+  def metadata_get_all_symbols(%Coinapi.Options{url: url, headers: headers}, exchange_id) do
+    Coinapi.get(url <> "v1/symbols/#{exchange_id}", headers)
+  end
+
+  def metadata_get_all_symbols(
+        %Coinapi.Options{url: url, headers: headers},
+        filter_symbol_id,
+        filter_exchange_id,
+        filter_asset_id
+      ) do
+    Coinapi.get(
+      url <>
+        "v1/symbols?filter_symbol_id=#{filter_symbol_id}&filter_exchange_id=#{filter_exchange_id}&filter_asset_id=#{
+          filter_asset_id
+        }",
+      headers
+    )
   end
 end
